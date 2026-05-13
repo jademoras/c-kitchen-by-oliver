@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — C Kitchen by Oliver</title>
+  <meta name="description" content="Sign in to C Kitchen by Oliver to order fresh fried rice, noodles, and more, delivered to your door." />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/auth.css" />
+</head>
+<body>
+
+<div class="auth-page">
+  <!-- Hero Panel -->
+  <div class="auth-hero">
+    <div class="auth-hero-logo">
+      🍽 C Kitchen<span class="brand-dot">.</span>
+    </div>
+    <div class="auth-hero-content">
+      <h1>Fresh food,<br /><span>cooked with love.</span></h1>
+      <p>Fried Rice, Noodles, Kabab & Manchurian — made fresh, delivered fast by Oliver's Kitchen.</p>
+    </div>
+    <div class="auth-features">
+      <div class="auth-feature-item"><div class="feature-icon">🍜</div> Fried Rice, Noodles & more</div>
+      <div class="auth-feature-item"><div class="feature-icon">🌶</div> Schezwan Specials</div>
+      <div class="auth-feature-item"><div class="feature-icon">🍗</div> Kabab & Manchurian</div>
+    </div>
+    <div class="auth-hero-emoji">🍕</div>
+  </div>
+
+  <!-- Form Panel -->
+  <div class="auth-form-panel">
+    <div class="auth-form-card">
+      <h2>Welcome back</h2>
+      <p class="auth-subtitle">Sign in to your account to continue ordering.</p>
+
+      <form class="auth-form" id="login-form" novalidate>
+        <div class="form-group">
+          <label for="login-email">Email address</label>
+          <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email" required />
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="login-btn">Sign In</button>
+      </form>
+
+      <p class="auth-switch">
+        Don't have an account? <a href="/signup.html">Create one →</a>
+      </p>
+      <p class="auth-switch" style="margin-top:0.5rem;">
+        Are you an admin? <a href="/admin/index.html">Admin portal →</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { signIn, redirectIfAuthenticated } from "/js/auth.js";
+  import { showToast, setFieldError, clearFieldError, isValidEmail } from "/js/utils.js";
+
+  // Redirect if already logged in
+  redirectIfAuthenticated("/menu.html");
+
+  const form    = document.getElementById("login-form");
+  const emailEl = document.getElementById("login-email");
+  const passEl  = document.getElementById("login-password");
+  const btn     = document.getElementById("login-btn");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    let valid = true;
+
+    clearFieldError(emailEl); clearFieldError(passEl);
+
+    if (!isValidEmail(emailEl.value)) { setFieldError(emailEl, "Enter a valid email."); valid = false; }
+    if (!passEl.value)                { setFieldError(passEl,  "Password is required."); valid = false; }
+    if (!valid) return;
+
+    btn.disabled = true;
+    btn.textContent = "Signing in…";
+    try {
+      await signIn(emailEl.value.trim(), passEl.value);
+      // redirectIfAuthenticated will handle redirect
+    } catch (err) {
+      const msg = err.code === "auth/invalid-credential"
+        ? "Invalid email or password."
+        : err.message;
+      showToast(msg, "error");
+      btn.disabled = false;
+      btn.textContent = "Sign In";
+    }
+  });
+</script>
+</body>
+</html>
