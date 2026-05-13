@@ -13,22 +13,26 @@ import { showToast, setLoading } from "./utils.js";
 export async function signUp({ name, email, phone, address, password }) {
   setLoading(true);
   try {
-    // 1. Create auth user
-    const { data, error: authError } = await supabase.auth.signUp({ email, password });
+    // 1. Create auth user (trigger auto-creates profile row)
+    const { data, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name } }
+    });
     if (authError) throw authError;
 
     const user = data.user;
 
-    // 2. Insert profile row (id matches auth.users.id)
-    const { error: dbError } = await supabase.from("users").insert({
-      id:      user.id,
-      name,
-      email,
-      phone,
-      address,
-      role:    "customer"
-    });
-    if (dbError) throw dbError;
+    // 2. Sign in immediately to establish session
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    if (signInError) throw signInError;
+
+    // 3. Update profile with phone + address (trigger only sets name/email)
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({ name, phone, address })
+      .eq("id", user.id);
+    if (updateError) throw updateError;
 
     return user;
   } finally {
