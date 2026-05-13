@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orders Dashboard — C Kitchen by Oliver</title>
+  <meta name="description" content="Real-time order management dashboard for Preston Cloud Kitchen." />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body>
+
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-brand">🍽 C Kitchen<span class="brand-dot">.</span> <span class="sidebar-badge">Oliver</span></div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link active" href="/admin/dashboard.html">
+        <span class="link-icon">📋</span> Orders
+      </a>
+      <a class="sidebar-link" href="/admin/menu-manage.html">
+        <span class="link-icon">🍽</span> Menu Items
+      </a>
+      <a class="sidebar-link" href="/admin/seed.html">
+        <span class="link-icon">🌱</span> Seed Menu
+      </a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="sidebar-admin-info">
+        <div class="admin-avatar" id="admin-avatar-initial">A</div>
+        <div class="admin-info-text">
+          <div class="admin-name-text" id="admin-name">Admin</div>
+          <div class="admin-role-text">Kitchen Owner</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm btn-block" id="logout-btn" style="margin-top:0.5rem;">Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <h1>📋 Orders Dashboard</h1>
+      <div class="topbar-right">
+        <span style="font-size:0.82rem;color:var(--clr-text-muted);">Total: <strong id="orders-count" style="color:var(--clr-text);">—</strong></span>
+      </div>
+    </div>
+
+    <div class="page-container">
+      <!-- Stats Bar -->
+      <div class="stats-bar" id="stats-bar">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-pending">—</div>
+          <div class="stat-label">⏳ Pending</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-accepted">—</div>
+          <div class="stat-label">✔ Accepted</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-preparing">—</div>
+          <div class="stat-label">👨‍🍳 Preparing</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-delivered">—</div>
+          <div class="stat-label">🎉 Delivered</div>
+        </div>
+      </div>
+
+      <!-- Status Filter Tabs -->
+      <div class="status-tabs">
+        <button class="status-tab active" data-status="All">All</button>
+        <button class="status-tab" data-status="Pending">⏳ Pending</button>
+        <button class="status-tab" data-status="Accepted">✔ Accepted</button>
+        <button class="status-tab" data-status="Rejected">✕ Rejected</button>
+        <button class="status-tab" data-status="Preparing">👨‍🍳 Preparing</button>
+        <button class="status-tab" data-status="Delivered">🎉 Delivered</button>
+      </div>
+
+      <!-- Skeleton -->
+      <div id="orders-skeleton" style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="skeleton" style="height:200px;border-radius:var(--radius-lg);"></div>
+        <div class="skeleton" style="height:200px;border-radius:var(--radius-lg);"></div>
+      </div>
+
+      <!-- Orders list -->
+      <div id="orders-container"></div>
+
+      <!-- Empty state -->
+      <div class="empty-state" id="orders-empty" style="display:none;">
+        <span class="empty-state-icon">📭</span>
+        <h3>No orders here</h3>
+        <p>New orders will appear in real-time as customers place them.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import "/js/admin-orders.js";
+  // Update stats counts whenever orders update
+  import { listenAllOrders } from "/js/firestore.js";
+  listenAllOrders((orders) => {
+    const count = (status) => orders.filter(o => o.status === status).length;
+    document.getElementById("stat-pending").textContent   = count("Pending");
+    document.getElementById("stat-accepted").textContent  = count("Accepted");
+    document.getElementById("stat-preparing").textContent = count("Preparing");
+    document.getElementById("stat-delivered").textContent = count("Delivered");
+  });
+</script>
+</body>
+</html>
