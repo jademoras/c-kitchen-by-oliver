@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Orders — C Kitchen by Oliver</title>
+  <meta name="description" content="Track your C Kitchen by Oliver order in real-time." />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/orders.css" />
+  <style>
+    .delivery-info-bar { background:var(--clr-surface); border-bottom:1px solid var(--clr-border); display:flex; justify-content:center; gap:2rem; padding:.55rem 1.5rem; font-size:.8rem; color:var(--clr-text-muted); }
+    .delivery-info-bar span { display:flex; align-items:center; gap:.35rem; }
+    .delivery-info-bar strong { color:var(--clr-text); }
+    .eta-display {
+      display: inline-flex; align-items:center; gap:.4rem;
+      background: var(--clr-primary-alpha); color:var(--clr-primary);
+      padding:.35rem .85rem; border-radius:var(--radius-full);
+      font-size:.8rem; font-weight:700; margin-top:.35rem;
+    }
+    .countdown { font-size:.75rem; color:var(--clr-text-muted); margin-top:.25rem; }
+  </style>
+</head>
+<body>
+
+<div class="delivery-info-bar">
+  <span>🕐 Delivery in <strong>30–45 mins</strong></span>
+  <span>📞 <strong>9741492381</strong></span>
+  <span>🍽 C Kitchen by Oliver</span>
+</div>
+
+<nav class="navbar">
+  <a class="navbar-brand" href="/preview/menu.html">🍽 C Kitchen<span class="brand-dot">.</span></a>
+  <div class="navbar-nav">
+    <a class="nav-link" href="/preview/menu.html">Menu</a>
+    <a class="nav-link active" href="/preview/orders.html">My Orders</a>
+    <a class="nav-link" href="/index.html">Sign In</a>
+  </div>
+</nav>
+
+<main class="page-container">
+  <div class="page-header">
+    <h1>My Orders 📦</h1>
+    <p>Track your orders from C Kitchen by Oliver — updated in real-time.</p>
+  </div>
+  <div id="orders-container"></div>
+</main>
+
+<script>
+// ── Merge localStorage orders + default samples ─────────────────────
+const DEFAULT_ORDERS = [
+  {
+    id: "ORD8F2A91C",
+    status: "Delivered",
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    estimatedDeliveryAt: new Date(Date.now() - 2 * 60 * 60 * 1000 + 40 * 60 * 1000).toISOString(),
+    deliveredAt: new Date(Date.now() - 75 * 60 * 1000).toISOString(),
+    items: [
+      { name:"Chicken Fried Rice", qty:2, price:120, img:"https://images.unsplash.com/photo-1512058564366-18510be2db19?w=80&q=80" },
+      { name:"Gobi Manchurian",    qty:1, price:160, img:"https://images.unsplash.com/photo-1630409351241-e90e7f6a8bf4?w=80&q=80" },
+    ],
+    total: 400, notes: "Less spicy please"
+  },
+  {
+    id: "ORD3C1D47E",
+    status: "Preparing",
+    createdAt: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
+    estimatedDeliveryAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+    items: [
+      { name:"Schezwan Chicken Noodles", qty:1, price:160, img:"https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=80&q=80" },
+      { name:"Fried Chicken",            qty:1, price:200, img:"https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=80&q=80" },
+    ],
+    total: 360, notes: ""
+  },
+  {
+    id: "ORD7B9E23F",
+    status: "Pending",
+    createdAt: new Date(Date.now() - 3 * 60 * 1000).toISOString(),
+    estimatedDeliveryAt: new Date(Date.now() + 37 * 60 * 1000).toISOString(),
+    items: [
+      { name:"Kabab",         qty:2, price:120, img:"https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=80&q=80" },
+      { name:"Veg Fried Rice",qty:1, price:100, img:"https://images.unsplash.com/photo-1596560548464-f010549b84d7?w=80&q=80" },
+    ],
+    total: 340, notes: "Extra chutney"
+  },
+];
+
+const savedOrders = JSON.parse(localStorage.getItem("ck_orders") || "[]");
+const ALL_ORDERS  = [...savedOrders, ...DEFAULT_ORDERS];
+
+const STATUS_MAP = { Pending:"badge-amber", Accepted:"badge-blue", Rejected:"badge-red", Preparing:"badge-purple", Delivered:"badge-green" };
+const STATUS_ICON= { Pending:"⏳", Accepted:"✔", Rejected:"✕", Preparing:"👨‍🍳", Delivered:"🎉" };
+const STEPS = ["Pending","Accepted","Preparing","Delivered"];
+
+function fmt(d) {
+  return new Date(d).toLocaleTimeString("en-IN", { hour:"2-digit", minute:"2-digit" });
+}
+function fmtDate(d) {
+  return new Date(d).toLocaleString("en-IN", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" });
+}
+
+// Countdown timer
+function minsLeft(isoStr) {
+  const diff = Math.round((new Date(isoStr) - Date.now()) / 60000);
+  if (diff <= 0) return "arriving now";
+  return `${diff} min${diff === 1 ? "" : "s"} away`;
+}
+
+function etaBlock(order) {
+  if (order.status === "Rejected") return `<p style="font-size:.8rem;color:var(--clr-error);margin:.5rem 0 0;">❌ Order was rejected by the kitchen.</p>`;
+  if (order.status === "Delivered") {
+    const t = order.deliveredAt ? fmt(order.deliveredAt) : fmt(order.estimatedDeliveryAt);
+    return `<div class="eta-display">🎉 Delivered at ${t}</div>`;
+  }
+  return `
+    <div class="eta-display" id="eta-${order.id}">🕐 Est. delivery by ${fmt(order.estimatedDeliveryAt)}</div>
+    <div class="countdown" id="cd-${order.id}">${minsLeft(order.estimatedDeliveryAt)}</div>`;
+}
+
+function progressBar(status) {
+  if (status === "Rejected") return "";
+  const activeIdx = STEPS.indexOf(status);
+  return `<div class="status-progress">
+    ${STEPS.map((step, i) => {
+      const done   = i < activeIdx;
+      const active = i === activeIdx;
+      return `<div class="status-step ${done?"done":""} ${active?"active":""}">
+        <div class="step-dot">${done ? "✓" : (i+1)}</div>
+        <div class="step-label">${step}</div>
+      </div>`;
+    }).join("")}
+  </div>`;
+}
+
+const container = document.getElementById("orders-container");
+
+if (ALL_ORDERS.length === 0) {
+  container.innerHTML = `<div style="text-align:center;padding:4rem 1rem;color:var(--clr-text-muted);">
+    <div style="font-size:3rem;margin-bottom:1rem;">📦</div>
+    <h3>No orders yet</h3>
+    <p>Head to the menu and place your first order!</p>
+    <a href="/preview/menu.html" class="btn btn-primary" style="margin-top:1rem;">Browse Menu →</a>
+  </div>`;
+} else {
+  container.innerHTML = ALL_ORDERS.map(order => {
+    const items = order.items.map(i => `
+      <div class="order-item-row">
+        <img src="${i.img || '/assets/placeholder.svg'}" alt="${i.name}" onerror="this.src='/assets/placeholder.svg'" />
+        <span>${i.name} × ${i.qty}</span>
+        <span>₹${(i.price * i.qty).toFixed(2)}</span>
+      </div>`).join("");
+
+    return `
+      <div class="order-card" style="margin-bottom:1.25rem;">
+        <div class="order-card-header">
+          <div>
+            <span class="order-id">#${order.id}</span>
+            <span class="order-date">${fmtDate(order.createdAt)}</span>
+          </div>
+          <span class="badge ${STATUS_MAP[order.status] || 'badge-gray'}">${STATUS_ICON[order.status] || "?"} ${order.status}</span>
+        </div>
+        ${progressBar(order.status)}
+        ${etaBlock(order)}
+        <div class="order-items" style="margin-top:.75rem;">${items}</div>
+        ${order.notes ? `<p class="order-notes">📝 ${order.notes}</p>` : ""}
+        <div class="order-card-footer">
+          <span class="order-total">Total: ₹${Number(order.total).toFixed(2)}</span>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+// Tick countdown every 30s
+setInterval(() => {
+  ALL_ORDERS.forEach(o => {
+    if (!o.estimatedDeliveryAt || o.status === "Delivered" || o.status === "Rejected") return;
+    const el = document.getElementById(`cd-${o.id}`);
+    if (el) el.textContent = minsLeft(o.estimatedDeliveryAt);
+  });
+}, 30000);
+</script>
+</body>
+</html>
