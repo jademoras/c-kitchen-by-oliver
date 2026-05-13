@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menu — C Kitchen by Oliver</title>
+  <meta name="description" content="Browse C Kitchen by Oliver's fresh menu: Fried Rice, Noodles, Schezwan Specials, Kabab & Manchurian. Order online." />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/menu.css" />
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <a class="navbar-brand" href="/menu.html">🍽 C Kitchen<span class="brand-dot">.</span></a>
+  <div class="navbar-nav">
+    <span class="navbar-user">👤 <span id="user-name">…</span></span>
+    <a class="nav-link active" href="/menu.html">Menu</a>
+    <a class="nav-link" href="/orders.html">My Orders</a>
+    <a class="nav-link" href="/profile.html">Profile</a>
+    <button class="btn btn-ghost btn-sm" id="logout-btn">Sign Out</button>
+  </div>
+</nav>
+
+<!-- Cart FAB -->
+<div class="cart-fab-wrap">
+  <button class="cart-fab" id="cart-btn" aria-label="Open cart">🛒</button>
+  <span id="cart-badge">0</span>
+</div>
+
+<!-- Cart Overlay -->
+<div class="cart-overlay" id="cart-overlay"></div>
+
+<!-- Cart Panel -->
+<aside class="cart-panel" id="cart-panel" aria-label="Shopping cart">
+  <div class="cart-panel-header">
+    <h2>🛒 Your Cart</h2>
+    <button id="close-cart-btn" aria-label="Close cart">✕</button>
+  </div>
+
+  <div id="cart-items-list">
+    <div id="cart-empty-msg">
+      <span>🛒</span>
+      <p>Your cart is empty.<br/>Add some items to get started!</p>
+    </div>
+  </div>
+
+  <div class="cart-panel-footer">
+    <div class="cart-total-row">
+      <span>Order Total</span>
+      <span id="cart-total-amount">₹0.00</span>
+    </div>
+    <div id="cart-actions">
+      <textarea id="order-notes" placeholder="Special instructions or delivery notes (optional)…"></textarea>
+      <button class="btn btn-primary btn-block btn-lg" id="checkout-btn">Place Order →</button>
+    </div>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="page-container">
+  <div class="page-header">
+    <h1>C Kitchen by Oliver 🍽</h1>
+    <p>Fresh & hot — Fried Rice, Noodles, Schezwan Specials, Kabab & Manchurian</p>
+  </div>
+
+  <!-- Category Filters -->
+  <div class="filter-bar">
+    <button class="filter-btn active" data-category="All">All Items</button>
+    <button class="filter-btn" data-category="Fried Rice &amp; Noodles">🍜 Fried Rice &amp; Noodles</button>
+    <button class="filter-btn" data-category="Schezwan Special">🌶 Schezwan Special</button>
+    <button class="filter-btn" data-category="Kabab &amp; Manchurian">🍗 Kabab &amp; Manchurian</button>
+  </div>
+
+  <!-- Menu Grid -->
+  <div class="menu-grid" id="menu-grid">
+    <!-- Skeleton placeholders -->
+    <div class="menu-card" style="border:none;background:var(--clr-surface);">
+      <div class="skeleton" style="height:180px;border-radius:var(--radius-lg) var(--radius-lg) 0 0;"></div>
+      <div style="padding:1rem;display:flex;flex-direction:column;gap:0.6rem;">
+        <div class="skeleton" style="height:16px;width:70%;"></div>
+        <div class="skeleton" style="height:12px;width:90%;"></div>
+        <div class="skeleton" style="height:12px;width:60%;"></div>
+      </div>
+    </div>
+    <div class="menu-card" style="border:none;background:var(--clr-surface);">
+      <div class="skeleton" style="height:180px;border-radius:var(--radius-lg) var(--radius-lg) 0 0;"></div>
+      <div style="padding:1rem;display:flex;flex-direction:column;gap:0.6rem;">
+        <div class="skeleton" style="height:16px;width:70%;"></div>
+        <div class="skeleton" style="height:12px;width:90%;"></div>
+        <div class="skeleton" style="height:12px;width:60%;"></div>
+      </div>
+    </div>
+    <div class="menu-card" style="border:none;background:var(--clr-surface);">
+      <div class="skeleton" style="height:180px;border-radius:var(--radius-lg) var(--radius-lg) 0 0;"></div>
+      <div style="padding:1rem;display:flex;flex-direction:column;gap:0.6rem;">
+        <div class="skeleton" style="height:16px;width:70%;"></div>
+        <div class="skeleton" style="height:12px;width:90%;"></div>
+        <div class="skeleton" style="height:12px;width:60%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" id="no-items" style="display:none;">
+    <span class="empty-state-icon">🍽</span>
+    <h3>No items in this category</h3>
+    <p>Check back soon — the kitchen is working on it!</p>
+  </div>
+</main>
+
+<script type="module" src="/js/menu.js"></script>
+</body>
+</html>
