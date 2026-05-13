@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seed Menu — C Kitchen by Oliver</title>
+  <link rel="stylesheet" href="/css/main.css" />
+  <style>
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+    .seed-card { background: var(--clr-surface); border: 1px solid var(--clr-border); border-radius: var(--radius-xl); padding: 2.5rem; max-width: 680px; width: 100%; }
+    .seed-card h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .seed-card > p { margin-bottom: 1.5rem; }
+    .item-grid { display: flex; flex-direction: column; gap: 0.4rem; margin: 1.5rem 0; max-height: 320px; overflow-y: auto; padding-right: 0.5rem; }
+    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; background: var(--clr-bg-3); border-radius: var(--radius-md); font-size: 0.85rem; }
+    .item-row .item-cat { font-size: 0.72rem; color: var(--clr-primary); }
+    .item-row .item-price { font-weight: 700; color: var(--clr-primary); }
+    .item-row .item-status { font-size: 0.75rem; }
+    #log { background: var(--clr-bg); border: 1px solid var(--clr-border); border-radius: var(--radius-md); padding: 1rem; max-height: 180px; overflow-y: auto; font-size: 0.8rem; font-family: monospace; color: var(--clr-text-muted); display: none; margin-top: 1rem; }
+    #log p { margin: 2px 0; }
+    #log p.ok  { color: var(--clr-success); }
+    #log p.err { color: var(--clr-error); }
+    .progress-bar-wrap { background: var(--clr-bg-3); border-radius: var(--radius-full); height: 6px; margin: 1rem 0; overflow: hidden; display: none; }
+    .progress-bar { height: 100%; background: var(--clr-primary); border-radius: var(--radius-full); width: 0%; transition: width 0.3s ease; }
+  </style>
+</head>
+<body>
+<div class="seed-card">
+  <h1>🌱 Seed C Kitchen Menu</h1>
+  <p>This page loads all <strong>18 menu items</strong> into Supabase in one click. Run it <strong>once</strong> after running <code>supabase-setup.sql</code> — then delete or ignore this page.</p>
+
+  <div class="item-grid" id="item-grid"></div>
+
+  <div class="progress-bar-wrap" id="progress-wrap">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
+
+  <div id="log"></div>
+
+  <div style="display:flex;gap:0.75rem;margin-top:1rem;flex-wrap:wrap;">
+    <button class="btn btn-primary btn-lg" id="seed-btn">🚀 Seed All 21 Items</button>
+    <button class="btn btn-danger btn-sm" id="clear-btn">🗑 Clear All Menu Items</button>
+    <a href="/admin/menu-manage.html" class="btn btn-secondary btn-sm">← Back to Menu Manager</a>
+  </div>
+</div>
+
+<script type="module">
+  import { supabase } from "/js/supabase-config.js";
+  import { requireAdmin } from "/js/auth.js";
+  import { showToast } from "/js/utils.js";
+
+  // ─── Full C Kitchen by Oliver Menu ────────────────────────────
+  const MENU_ITEMS = [
+    // Fried Rice & Noodles
+    { name: "Chicken Fried Rice",  description: "Wok-tossed basmati rice with tender chicken pieces, fresh vegetables and soy sauce",       price: 120, category: "Fried Rice & Noodles", available: true },
+    { name: "Chicken Noodles",     description: "Stir-fried noodles with juicy chicken strips, spring onions and chef's special sauce",       price: 130, category: "Fried Rice & Noodles", available: true },
+    { name: "Egg Fried Rice",      description: "Golden fried rice with fluffy scrambled egg, vegetables and a hint of sesame",              price: 110, category: "Fried Rice & Noodles", available: true },
+    { name: "Egg Noodles",         description: "Stir-fried noodles tossed with egg, seasonal vegetables and aromatic sauces",               price: 120, category: "Fried Rice & Noodles", available: true },
+    { name: "Veg Fried Rice",      description: "Wok-tossed rice with garden fresh vegetables, soy sauce and herbs",                         price: 100, category: "Fried Rice & Noodles", available: true },
+    { name: "Veg Noodles",         description: "Light stir-fried noodles loaded with colourful vegetables in savory sauce",                  price: 110, category: "Fried Rice & Noodles", available: true },
+
+    // Schezwan Special
+    { name: "Schezwan Chicken Fried Rice", description: "Fiery Schezwan-spiced fried rice with chicken — bold flavour, extra kick",           price: 150, category: "Schezwan Special", available: true },
+    { name: "Schezwan Chicken Noodles",    description: "Spicy Schezwan noodles with chicken strips — for those who love the heat",           price: 160, category: "Schezwan Special", available: true },
+    { name: "Schezwan Egg Fried Rice",     description: "Egg fried rice elevated with our signature spicy Schezwan sauce",                    price: 140, category: "Schezwan Special", available: true },
+    { name: "Schezwan Egg Noodles",        description: "Noodles tossed in Schezwan sauce with scrambled egg and vegetables",                 price: 150, category: "Schezwan Special", available: true },
+    { name: "Schezwan Veg Fried Rice",     description: "Vegetarian fried rice packed with veggies and smothered in Schezwan sauce",          price: 130, category: "Schezwan Special", available: true },
+    { name: "Schezwan Veg Noodles",        description: "Vegetarian noodles stir-fried with Schezwan sauce — spicy & satisfying",            price: 140, category: "Schezwan Special", available: true },
+
+    // Kabab & Manchurian
+    { name: "Kabab",               description: "Juicy minced chicken kebabs marinated in aromatic spices, char-grilled to perfection",      price: 120, category: "Kabab & Manchurian", available: true },
+    { name: "Fried Chicken",       description: "Crispy golden-fried chicken pieces with Oliver's special spice blend — irresistible",       price: 200, category: "Kabab & Manchurian", available: true },
+    { name: "Chicken Manchurian",  description: "Crispy chicken balls in a tangy, spicy Manchurian sauce with garlic and spring onions",     price: 170, category: "Kabab & Manchurian", available: true },
+    { name: "Gobi Manchurian",     description: "Crispy cauliflower florets tossed in a rich, tangy Manchurian sauce — a classic favourite", price: 160, category: "Kabab & Manchurian", available: true },
+    { name: "Chicken Chilli",      description: "Tender chicken sautéed with green chillies, capsicum and onions in a fiery sauce",          price: 180, category: "Kabab & Manchurian", available: true },
+    { name: "Gobi Chilli",         description: "Crispy cauliflower stir-fried with chillies, capsicum and a tangy chilli sauce",            price: 170, category: "Kabab & Manchurian", available: true },
+  ];
+
+  // ─── Render preview table ──────────────────────────────────────
+  const grid = document.getElementById("item-grid");
+  MENU_ITEMS.forEach(item => {
+    grid.innerHTML += `
+      <div class="item-row">
+        <div>
+          <span class="item-cat">${item.category}</span><br/>
+          <span>${item.name}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <span class="item-price">₹${item.price}</span>
+          <span class="item-status" id="status-${item.name.replace(/\s+/g,'_')}">⏸</span>
+        </div>
+      </div>`;
+  });
+
+  // ─── Require admin ─────────────────────────────────────────────
+  await requireAdmin();
+
+  const seedBtn  = document.getElementById("seed-btn");
+  const clearBtn = document.getElementById("clear-btn");
+  const log      = document.getElementById("log");
+  const progWrap = document.getElementById("progress-wrap");
+  const progBar  = document.getElementById("progress-bar");
+
+  function logLine(msg, type = "") {
+    log.style.display = "block";
+    const p = document.createElement("p");
+    p.className = type;
+    p.textContent = msg;
+    log.appendChild(p);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  // ─── Seed ─────────────────────────────────────────────────────
+  seedBtn.addEventListener("click", async () => {
+    seedBtn.disabled = true;
+    seedBtn.textContent = "Seeding…";
+    log.innerHTML = "";
+    progWrap.style.display = "block";
+    logLine("Starting menu seed for C Kitchen by Oliver…");
+
+    let done = 0;
+    for (const item of MENU_ITEMS) {
+      const key = item.name.replace(/\s+/g, "_");
+      try {
+        const { error } = await supabase.from("menu_items").insert({
+          name:        item.name,
+          description: item.description,
+          price:       item.price,
+          category:    item.category,
+          available:   item.available,
+          image_url:   ""
+        });
+        if (error) throw error;
+        document.getElementById("status-" + key).textContent = "✓";
+        logLine(`✓ Added: ${item.name} (₹${item.price})`, "ok");
+      } catch (err) {
+        document.getElementById("status-" + key).textContent = "✕";
+        logLine(`✕ Failed: ${item.name} — ${err.message}`, "err");
+      }
+      done++;
+      progBar.style.width = `${(done / MENU_ITEMS.length) * 100}%`;
+    }
+
+    logLine(`\n✅ Done! ${done} items processed. Visit /menu.html to see them.`);
+    showToast("Menu seeded successfully! 🎉", "success", 5000);
+    seedBtn.textContent = "✅ Seeded!";
+  });
+
+  // ─── Clear all menu items ──────────────────────────────────────
+  clearBtn.addEventListener("click", async () => {
+    if (!confirm("Delete ALL menu items from Supabase? This cannot be undone.")) return;
+    clearBtn.disabled = true;
+    log.innerHTML = "";
+    logLine("Clearing all menu items…");
+    try {
+      const { error, count } = await supabase
+        .from("menu_items")
+        .delete({ count: "exact" })
+        .neq("id", "00000000-0000-0000-0000-000000000000"); // match all rows
+      if (error) throw error;
+      logLine(`✓ Deleted ${count ?? "all"} items.`, "ok");
+      showToast(`Deleted all menu items.`, "success");
+    } catch (err) {
+      logLine(`✕ Error: ${err.message}`, "err");
+    }
+    clearBtn.disabled = false;
+  });
+</script>
+</body>
+</html>
