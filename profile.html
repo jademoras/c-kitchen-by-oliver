@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile — C Kitchen by Oliver</title>
+  <meta name="description" content="Manage your delivery address, phone number, and account details." />
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="navbar-brand" href="/menu.html">🍽 C Kitchen<span class="brand-dot">.</span></a>
+  <div class="navbar-nav">
+    <a class="nav-link" href="/menu.html">Menu</a>
+    <a class="nav-link" href="/orders.html">My Orders</a>
+    <a class="nav-link active" href="/profile.html">Profile</a>
+    <button class="btn btn-ghost btn-sm" id="logout-btn">Sign Out</button>
+  </div>
+</nav>
+
+<main class="page-container" style="max-width:640px;">
+  <div class="page-header">
+    <h1>My Profile 👤</h1>
+    <p>Update your name, phone number, and delivery address.</p>
+  </div>
+
+  <div class="card">
+    <form id="profile-form" novalidate style="display:flex;flex-direction:column;gap:1.25rem;">
+      <div class="form-group">
+        <label for="profile-email">Email address</label>
+        <input type="email" id="profile-email" disabled style="opacity:0.6;cursor:not-allowed;" />
+        <p style="font-size:0.78rem;margin-top:4px;">Email cannot be changed.</p>
+      </div>
+      <div class="form-group">
+        <label for="profile-name">Full name</label>
+        <input type="text" id="profile-name" placeholder="Jane Doe" required />
+      </div>
+      <div class="form-group">
+        <label for="profile-phone">Phone number</label>
+        <input type="tel" id="profile-phone" placeholder="9876543210" required />
+      </div>
+      <div class="form-group">
+        <label for="profile-address">Delivery address</label>
+        <textarea id="profile-address" placeholder="123 Main St, City, State" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
+    </form>
+  </div>
+</main>
+
+<script type="module" src="/js/profile.js"></script>
+</body>
+</html>
