@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 180" width="240" height="180">
+  <rect width="240" height="180" fill="#1e1e2e" rx="10"/>
+  <text x="120" y="105" font-size="64" text-anchor="middle">🍽</text>
+  <text x="120" y="140" font-size="14" text-anchor="middle" fill="#4e4e63" font-family="sans-serif">No image</text>
+</svg>
