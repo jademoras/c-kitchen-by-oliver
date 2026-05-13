@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login — C Kitchen by Oliver</title>
+  <meta name="description" content="Admin portal login for Preston Cloud Kitchen kitchen management." />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/auth.css" />
+</head>
+<body>
+
+<div class="auth-page">
+  <!-- Hero Panel -->
+  <div class="auth-hero">
+    <div class="auth-hero-logo">🍽 C Kitchen<span class="brand-dot">.</span></div>
+    <div class="auth-hero-content">
+      <h1>C Kitchen <span>Oliver's</span> Portal</h1>
+      <p>Manage orders, update the menu, and keep C Kitchen running smoothly.</p>
+    </div>
+    <div class="auth-features">
+      <div class="auth-feature-item"><div class="feature-icon">📋</div> Real-time order dashboard</div>
+      <div class="auth-feature-item"><div class="feature-icon">✏️</div> Full menu management</div>
+      <div class="auth-feature-item"><div class="feature-icon">🔔</div> Instant order notifications</div>
+    </div>
+    <div class="auth-hero-emoji">👨‍🍳</div>
+  </div>
+
+  <!-- Form Panel -->
+  <div class="auth-form-panel">
+    <div class="auth-form-card">
+      <h2>Admin Sign In</h2>
+      <p class="auth-subtitle">Restricted to authorized kitchen staff only.</p>
+
+      <form class="auth-form" id="admin-login-form" novalidate>
+        <div class="form-group">
+          <label for="admin-email">Admin email</label>
+          <input type="email" id="admin-email" placeholder="admin@example.com" autocomplete="email" required />
+        </div>
+        <div class="form-group">
+          <label for="admin-password">Password</label>
+          <input type="password" id="admin-password" placeholder="••••••••" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="admin-login-btn">Sign In to Kitchen</button>
+      </form>
+
+      <p class="auth-switch" style="margin-top:1.5rem;">
+        Customer portal: <a href="/index.html">← Back to customer login</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { signIn, getUserProfile, redirectIfAuthenticated } from "/js/auth.js";
+  import { showToast, isValidEmail, setFieldError, clearFieldError } from "/js/utils.js";
+  import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { auth } from "/js/firebase-config.js";
+
+  redirectIfAuthenticated("/menu.html");
+
+  const form    = document.getElementById("admin-login-form");
+  const emailEl = document.getElementById("admin-email");
+  const passEl  = document.getElementById("admin-password");
+  const btn     = document.getElementById("admin-login-btn");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearFieldError(emailEl); clearFieldError(passEl);
+    let valid = true;
+    if (!isValidEmail(emailEl.value)) { setFieldError(emailEl, "Enter a valid email."); valid = false; }
+    if (!passEl.value)                { setFieldError(passEl,  "Password is required."); valid = false; }
+    if (!valid) return;
+
+    btn.disabled = true;
+    btn.textContent = "Signing in…";
+    try {
+      const user    = await signIn(emailEl.value.trim(), passEl.value);
+      const profile = await getUserProfile(user.uid);
+      if (profile?.role !== "admin") {
+        await signOut(auth);
+        showToast("Access denied. This account is not an admin.", "error");
+        btn.disabled = false;
+        btn.textContent = "Sign In to Kitchen";
+        return;
+      }
+      window.location.href = "/admin/dashboard.html";
+    } catch (err) {
+      const msg = err.code === "auth/invalid-credential"
+        ? "Invalid email or password."
+        : err.message;
+      showToast(msg, "error");
+      btn.disabled = false;
+      btn.textContent = "Sign In to Kitchen";
+    }
+  });
+</script>
+</body>
+</html>
