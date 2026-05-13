@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menu Manager — C Kitchen by Oliver</title>
+  <meta name="description" content="Add, edit, and delete menu items for Preston Cloud Kitchen." />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body>
+
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-brand">🍽 C Kitchen<span class="brand-dot">.</span> <span class="sidebar-badge">Oliver</span></div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link" href="/admin/dashboard.html">
+        <span class="link-icon">📋</span> Orders
+      </a>
+      <a class="sidebar-link active" href="/admin/menu-manage.html">
+        <span class="link-icon">🍽</span> Menu Items
+      </a>
+      <a class="sidebar-link" href="/admin/seed.html">
+        <span class="link-icon">🌱</span> Seed Menu
+      </a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="sidebar-admin-info">
+        <div class="admin-avatar">A</div>
+        <div class="admin-info-text">
+          <div class="admin-name-text" id="admin-name">Admin</div>
+          <div class="admin-role-text">Kitchen Owner</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm btn-block" id="logout-btn" style="margin-top:0.5rem;">Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <h1>🍽 Menu Manager</h1>
+      <div class="topbar-right">
+        <button class="btn btn-primary" id="add-item-btn">+ Add Item</button>
+      </div>
+    </div>
+
+    <div class="page-container">
+      <div class="menu-table-wrap">
+        <table class="menu-table">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="menu-table-body">
+            <!-- Skeleton rows -->
+            <tr><td colspan="6"><div class="skeleton" style="height:48px;margin:4px 0;"></div></td></tr>
+            <tr><td colspan="6"><div class="skeleton" style="height:48px;margin:4px 0;"></div></td></tr>
+            <tr><td colspan="6"><div class="skeleton" style="height:48px;margin:4px 0;"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="empty-state" id="table-empty" style="display:none;">
+        <span class="empty-state-icon">🍽</span>
+        <h3>No menu items yet</h3>
+        <p>Click <strong>+ Add Item</strong> to create your first menu item.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Overlay -->
+<div class="modal-overlay" id="modal-overlay"></div>
+
+<!-- Add / Edit Modal -->
+<div class="modal" id="item-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-header">
+    <h2 id="modal-title">Add Menu Item</h2>
+    <button id="modal-close-btn" aria-label="Close modal">✕</button>
+  </div>
+
+  <form class="modal-form" id="menu-item-form" novalidate>
+    <div class="form-group">
+      <label for="item-name">Item name *</label>
+      <input type="text" id="item-name" placeholder="e.g. Butter Chicken" required />
+    </div>
+    <div class="form-group">
+      <label for="item-desc">Description</label>
+      <textarea id="item-desc" placeholder="Brief description of the dish…"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="item-price">Price (₹) *</label>
+        <input type="number" id="item-price" placeholder="199" min="1" step="0.01" required />
+      </div>
+      <div class="form-group">
+        <label for="item-category">Category *</label>
+        <select id="item-category"></select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="item-image">Item image</label>
+      <input type="file" id="item-image" accept="image/*" />
+      <img id="image-preview" alt="Preview" />
+    </div>
+    <div class="form-group toggle-wrap">
+      <input type="checkbox" id="item-available" checked />
+      <label for="item-available">Available on menu</label>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block btn-lg">Save Item</button>
+  </form>
+</div>
+
+<script type="module" src="/js/admin-menu.js"></script>
+</body>
+</html>
