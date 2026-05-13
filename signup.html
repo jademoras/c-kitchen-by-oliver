@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — C Kitchen by Oliver</title>
+  <meta name="description" content="Create a free account on C Kitchen by Oliver and start ordering fresh fried rice, noodles, and more." />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/auth.css" />
+</head>
+<body>
+
+<div class="auth-page">
+  <!-- Hero Panel -->
+  <div class="auth-hero">
+    <div class="auth-hero-logo">🍽 C Kitchen<span class="brand-dot">.</span></div>
+    <div class="auth-hero-content">
+      <h1>Join the <span>C Kitchen</span> family.</h1>
+      <p>Sign up in seconds and start enjoying Oliver's chef-crafted meals — hot, fresh, and fast.</p>
+    </div>
+    <div class="auth-features">
+      <div class="auth-feature-item"><div class="feature-icon">🚀</div> Quick 30-second signup</div>
+      <div class="auth-feature-item"><div class="feature-icon">🔒</div> Secure Firebase Auth</div>
+      <div class="auth-feature-item"><div class="feature-icon">📦</div> Track every order live</div>
+    </div>
+    <div class="auth-hero-emoji">🍔</div>
+  </div>
+
+  <!-- Form Panel -->
+  <div class="auth-form-panel">
+    <div class="auth-form-card">
+      <h2>Create account</h2>
+      <p class="auth-subtitle">Fill in your details to get started.</p>
+
+      <form class="auth-form" id="signup-form" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="signup-name">Full name</label>
+            <input type="text" id="signup-name" placeholder="Jane Doe" autocomplete="name" required />
+          </div>
+          <div class="form-group">
+            <label for="signup-phone">Phone number</label>
+            <input type="tel" id="signup-phone" placeholder="9876543210" autocomplete="tel" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="signup-address">Delivery address</label>
+          <textarea id="signup-address" placeholder="123 Main St, City, State" autocomplete="street-address" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="signup-email">Email address</label>
+          <input type="email" id="signup-email" placeholder="you@example.com" autocomplete="email" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="signup-password">Password</label>
+            <input type="password" id="signup-password" placeholder="Min 6 characters" autocomplete="new-password" required />
+          </div>
+          <div class="form-group">
+            <label for="signup-confirm">Confirm password</label>
+            <input type="password" id="signup-confirm" placeholder="Repeat password" autocomplete="new-password" required />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="signup-btn">Create Account</button>
+      </form>
+
+      <p class="auth-switch">Already have an account? <a href="/index.html">Sign in →</a></p>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { signUp, redirectIfAuthenticated } from "/js/auth.js";
+  import { showToast, isValidEmail, isValidPhone, setFieldError, clearFieldError } from "/js/utils.js";
+
+  redirectIfAuthenticated("/menu.html");
+
+  const form      = document.getElementById("signup-form");
+  const nameEl    = document.getElementById("signup-name");
+  const phoneEl   = document.getElementById("signup-phone");
+  const addressEl = document.getElementById("signup-address");
+  const emailEl   = document.getElementById("signup-email");
+  const passEl    = document.getElementById("signup-password");
+  const confEl    = document.getElementById("signup-confirm");
+  const btn       = document.getElementById("signup-btn");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    [nameEl, phoneEl, addressEl, emailEl, passEl, confEl].forEach(clearFieldError);
+    let valid = true;
+
+    if (!nameEl.value.trim())      { setFieldError(nameEl,    "Full name is required.");          valid = false; }
+    if (!isValidPhone(phoneEl.value)) { setFieldError(phoneEl, "Enter a valid 10-digit number."); valid = false; }
+    if (!addressEl.value.trim())   { setFieldError(addressEl, "Delivery address is required.");   valid = false; }
+    if (!isValidEmail(emailEl.value)) { setFieldError(emailEl, "Enter a valid email address.");   valid = false; }
+    if (passEl.value.length < 6)   { setFieldError(passEl,    "Password must be at least 6 characters."); valid = false; }
+    if (passEl.value !== confEl.value) { setFieldError(confEl, "Passwords do not match.");        valid = false; }
+    if (!valid) return;
+
+    btn.disabled = true;
+    btn.textContent = "Creating account…";
+    try {
+      await signUp({
+        name:     nameEl.value.trim(),
+        phone:    phoneEl.value.trim(),
+        address:  addressEl.value.trim(),
+        email:    emailEl.value.trim(),
+        password: passEl.value
+      });
+      showToast("Account created! Redirecting…", "success");
+      setTimeout(() => window.location.href = "/menu.html", 1200);
+    } catch (err) {
+      const msg = err.code === "auth/email-already-in-use"
+        ? "An account with this email already exists."
+        : err.message;
+      showToast(msg, "error");
+      btn.disabled = false;
+      btn.textContent = "Create Account";
+    }
+  });
+</script>
+</body>
+</html>
