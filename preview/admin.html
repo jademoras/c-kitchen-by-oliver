@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orders Dashboard — C Kitchen by Oliver</title>
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/admin.css" />
+  <style>
+    @keyframes slideIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+    .eta-pill { display:inline-flex; align-items:center; gap:.35rem; background:var(--clr-primary-alpha); color:var(--clr-primary); padding:.25rem .7rem; border-radius:var(--radius-full); font-size:.75rem; font-weight:700; }
+  </style>
+</head>
+<body>
+
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-brand">🍽 C Kitchen<span class="brand-dot">.</span> <span class="sidebar-badge">Oliver</span></div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link active" href="/preview/admin.html"><span class="link-icon">📋</span> Orders</a>
+      <a class="sidebar-link" href="#"><span class="link-icon">🍽</span> Menu Items</a>
+      <a class="sidebar-link" href="#"><span class="link-icon">🌱</span> Seed Menu</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="sidebar-admin-info">
+        <div class="admin-avatar">O</div>
+        <div class="admin-info-text">
+          <div class="admin-name-text">Oliver</div>
+          <div class="admin-role-text">Kitchen Owner</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <h1>📋 Orders Dashboard</h1>
+      <div class="topbar-right">
+        <span style="font-size:.82rem;color:var(--clr-text-muted);">Total: <strong style="color:var(--clr-text);">5</strong></span>
+      </div>
+    </div>
+
+    <div class="page-container">
+      <!-- Stats -->
+      <div class="stats-bar">
+        <div class="stat-card"><div class="stat-value" style="color:var(--clr-warning);">2</div><div class="stat-label">⏳ Pending</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:var(--clr-info);">1</div><div class="stat-label">✔ Accepted</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:var(--clr-purple);">1</div><div class="stat-label">👨‍🍳 Preparing</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:var(--clr-success);">1</div><div class="stat-label">🎉 Delivered</div></div>
+      </div>
+
+      <!-- Status Tabs -->
+      <div class="status-tabs" id="tabs">
+        <button class="status-tab active" data-status="All">All</button>
+        <button class="status-tab" data-status="Pending">⏳ Pending</button>
+        <button class="status-tab" data-status="Accepted">✔ Accepted</button>
+        <button class="status-tab" data-status="Preparing">👨‍🍳 Preparing</button>
+        <button class="status-tab" data-status="Delivered">🎉 Delivered</button>
+      </div>
+
+      <div id="orders-container"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ORDERS = [
+  {
+    id:"ORD7B9E23F", status:"Pending",
+    customer:{ name:"Riya Thomas",    phone:"9876543210", address:"12 MG Road, Bangalore" },
+    createdAt: new Date(Date.now() - 3*60*1000),
+    estimatedDeliveryAt: new Date(Date.now() + 37*60*1000),
+    items:[
+      { name:"Kabab",         qty:2, price:120, img:"https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=60&q=80" },
+      { name:"Veg Fried Rice",qty:1, price:100, img:"https://images.unsplash.com/photo-1596560548464-f010549b84d7?w=60&q=80" },
+    ], total:340, notes:"Extra chutney"
+  },
+  {
+    id:"ORDB2F78A1", status:"Pending",
+    customer:{ name:"Arjun Nair",     phone:"9123456789", address:"45 Indiranagar, Bangalore" },
+    createdAt: new Date(Date.now() - 8*60*1000),
+    estimatedDeliveryAt: new Date(Date.now() + 32*60*1000),
+    items:[
+      { name:"Schezwan Chicken Fried Rice", qty:1, price:150, img:"https://images.unsplash.com/photo-1512058564366-18510be2db19?w=60&q=80" },
+      { name:"Chicken Chilli",              qty:1, price:180, img:"https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=60&q=80" },
+    ], total:330, notes:""
+  },
+  {
+    id:"ORDA3D91C4", status:"Accepted",
+    customer:{ name:"Priya Menon",    phone:"9900112233", address:"7 Koramangala, Bangalore" },
+    createdAt: new Date(Date.now() - 18*60*1000),
+    estimatedDeliveryAt: new Date(Date.now() + 22*60*1000),
+    items:[
+      { name:"Chicken Manchurian",  qty:1, price:170, img:"https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=60&q=80" },
+      { name:"Chicken Fried Rice",  qty:1, price:120, img:"https://images.unsplash.com/photo-1512058564366-18510be2db19?w=60&q=80" },
+    ], total:290, notes:"No onion"
+  },
+  {
+    id:"ORD3C1D47E", status:"Preparing",
+    customer:{ name:"Samuel Jose",   phone:"9844556677", address:"88 HSR Layout, Bangalore" },
+    createdAt: new Date(Date.now() - 25*60*1000),
+    estimatedDeliveryAt: new Date(Date.now() + 15*60*1000),
+    items:[
+      { name:"Schezwan Chicken Noodles", qty:1, price:160, img:"https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=60&q=80" },
+      { name:"Fried Chicken",            qty:1, price:200, img:"https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=60&q=80" },
+    ], total:360, notes:""
+  },
+  {
+    id:"ORD8F2A91C", status:"Delivered",
+    customer:{ name:"Deepa Krishnan", phone:"9955667788", address:"22 Whitefield, Bangalore" },
+    createdAt: new Date(Date.now() - 2*60*60*1000),
+    estimatedDeliveryAt: new Date(Date.now() - 2*60*60*1000 + 40*60*1000),
+    items:[
+      { name:"Chicken Fried Rice", qty:2, price:120, img:"https://images.unsplash.com/photo-1512058564366-18510be2db19?w=60&q=80" },
+      { name:"Gobi Manchurian",    qty:1, price:160, img:"https://images.unsplash.com/photo-1630409351241-e90e7f6a8bf4?w=60&q=80" },
+    ], total:400, notes:"Less spicy"
+  },
+];
+
+const STATUSES = ["Pending","Accepted","Rejected","Preparing","Delivered"];
+const STATUS_MAP = {
+  Pending:   "badge-amber",
+  Accepted:  "badge-blue",
+  Rejected:  "badge-red",
+  Preparing: "badge-purple",
+  Delivered: "badge-green",
+};
+const STATUS_ICON = { Pending:"⏳", Accepted:"✔", Rejected:"✕", Preparing:"👨‍🍳", Delivered:"🎉" };
+
+function formatDate(d) {
+  return d.toLocaleString("en-IN", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" });
+}
+function fmtTime(d) {
+  return new Date(d).toLocaleTimeString("en-IN", { hour:"2-digit", minute:"2-digit" });
+}
+
+function renderOrders(filter) {
+  const container = document.getElementById("orders-container");
+  const list = filter === "All" ? ORDERS : ORDERS.filter(o => o.status === filter);
+
+  container.innerHTML = list.map(order => {
+    const quickBtns = order.status === "Pending"
+      ? `<button class="btn btn-success btn-sm" onclick="updateStatus('${order.id}','Accepted')">✔ Accept</button>
+         <button class="btn btn-danger btn-sm" onclick="updateStatus('${order.id}','Rejected')">✕ Reject</button>`
+      : "";
+
+    const opts = STATUSES.map(s => `<option value="${s}" ${s===order.status?"selected":""}>${s}</option>`).join("");
+
+    return `
+      <div class="admin-order-card status-${order.status.toLowerCase()}" id="card-${order.id}" style="animation:slideIn .3s ease both;">
+        <div class="admin-order-header">
+          <div class="admin-order-meta">
+            <span class="order-id">#${order.id}</span>
+            <span class="order-date">${formatDate(order.createdAt)}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:.6rem;">
+            ${order.estimatedDeliveryAt && order.status !== 'Rejected' ? `<span class="eta-pill">🕐 ${order.status === 'Delivered' ? 'Delivered' : 'ETA: ' + fmtTime(order.estimatedDeliveryAt)}</span>` : ''}
+            <span class="badge ${STATUS_MAP[order.status]}">${STATUS_ICON[order.status]} ${order.status}</span>
+          </div>
+        </div>
+        <div class="admin-customer-info">
+          <span>👤 ${order.customer.name}</span>
+          <span>📞 ${order.customer.phone}</span>
+          <span>📍 ${order.customer.address}</span>
+        </div>
+        <div class="admin-order-items">
+          ${order.items.map(i => `
+            <div class="admin-order-item">
+              <img src="${i.img}" alt="${i.name}" onerror="this.src='/assets/placeholder.svg'" />
+              <span>${i.name} × ${i.qty}</span>
+              <span>₹${(i.price*i.qty).toFixed(2)}</span>
+            </div>`).join("")}
+        </div>
+        ${order.notes ? `<p class="order-notes">📝 ${order.notes}</p>` : ""}
+        <div class="admin-order-footer">
+          <strong class="order-total">Total: ₹${order.total.toFixed(2)}</strong>
+          <div class="admin-order-actions">
+            ${quickBtns}
+            <div class="status-update-wrap">
+              <label>Update Status:</label>
+              <select class="status-select" onchange="updateStatus('${order.id}', this.value)">${opts}</select>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+let currentFilter = "All";
+
+function updateStatus(orderId, newStatus) {
+  const order = ORDERS.find(o => o.id === orderId);
+  if (!order) return;
+  order.status = newStatus;
+  renderOrders(currentFilter);
+  const t = document.createElement("div");
+  t.className = "toast toast-success";
+  t.innerHTML = `<span class="toast-icon">✓</span><span class="toast-message">Order ${orderId.slice(-6)} marked as ${newStatus}</span>`;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => t.classList.add("toast-visible"));
+  setTimeout(() => { t.classList.remove("toast-visible"); setTimeout(() => t.remove(), 400); }, 3000);
+}
+
+// Filter tabs
+document.getElementById("tabs").addEventListener("click", e => {
+  const tab = e.target.closest(".status-tab");
+  if (!tab) return;
+  document.querySelectorAll(".status-tab").forEach(t => t.classList.remove("active"));
+  tab.classList.add("active");
+  currentFilter = tab.dataset.status;
+  renderOrders(currentFilter);
+});
+
+renderOrders("All");
+</script>
+</body>
+</html>
