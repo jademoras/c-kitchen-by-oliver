@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menu — C Kitchen by Oliver</title>
+  <meta name="description" content="Order fresh Fried Rice, Noodles, Schezwan Specials, Kabab & Manchurian from C Kitchen by Oliver. Fast delivery, cooked fresh." />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/menu.css" />
+  <style>
+    .delivery-info-bar {
+      background: var(--clr-surface);
+      border-bottom: 1px solid var(--clr-border);
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      padding: 0.55rem 1.5rem;
+      font-size: 0.8rem;
+      color: var(--clr-text-muted);
+    }
+    .delivery-info-bar span { display:flex; align-items:center; gap:0.35rem; }
+    .delivery-info-bar strong { color: var(--clr-text); }
+    /* Order placed modal */
+    .order-modal-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000;
+      display:none; align-items:center; justify-content:center;
+    }
+    .order-modal-overlay.show { display:flex; }
+    .order-modal {
+      background:var(--clr-surface); border:1px solid var(--clr-border);
+      border-radius:var(--radius-xl); padding:2.5rem; max-width:420px; width:90%;
+      text-align:center; animation: popIn .35s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes popIn { from{opacity:0;transform:scale(.85)} to{opacity:1;transform:scale(1)} }
+    .order-modal .emoji { font-size:3.5rem; margin-bottom:.75rem; }
+    .order-modal h2 { font-size:1.4rem; margin-bottom:.5rem; }
+    .order-modal p { color:var(--clr-text-muted); font-size:.9rem; margin-bottom:1.5rem; }
+    .order-modal .eta-pill {
+      display:inline-flex; align-items:center; gap:.5rem;
+      background:var(--clr-primary-alpha); color:var(--clr-primary);
+      padding:.5rem 1.25rem; border-radius:var(--radius-full);
+      font-weight:700; font-size:1rem; margin-bottom:1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Top info bar -->
+<div class="delivery-info-bar">
+  <span>🕐 Delivery in <strong>30–45 mins</strong></span>
+  <span>📞 <strong>9741492381</strong></span>
+  <span>🍽 C Kitchen by Oliver</span>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <a class="navbar-brand" href="/preview/menu.html">🍽 C Kitchen<span class="brand-dot">.</span></a>
+  <div class="navbar-nav">
+    <span class="navbar-user">👤 <span id="user-name">Guest</span></span>
+    <a class="nav-link active" href="/preview/menu.html">Menu</a>
+    <a class="nav-link" href="/preview/orders.html">My Orders</a>
+    <a class="nav-link" href="/index.html">Sign In</a>
+  </div>
+</nav>
+
+<!-- Cart FAB -->
+<div class="cart-fab-wrap">
+  <button class="cart-fab" id="cart-btn" aria-label="Open cart">🛒</button>
+  <span id="cart-badge" style="display:none;">0</span>
+</div>
+
+<!-- Cart Overlay -->
+<div class="cart-overlay" id="cart-overlay"></div>
+
+<!-- Cart Panel -->
+<aside class="cart-panel" id="cart-panel">
+  <div class="cart-panel-header">
+    <h2>🛒 Your Cart</h2>
+    <button id="close-cart-btn">✕</button>
+  </div>
+  <div id="cart-items-list">
+    <div id="cart-empty-msg" style="display:flex;flex-direction:column;align-items:center;gap:.75rem;padding:3rem 1.5rem;text-align:center;color:var(--clr-text-muted);">
+      <span style="font-size:2.5rem;">🛒</span>
+      <p>Your cart is empty.<br/>Add some items to get started!</p>
+    </div>
+  </div>
+  <div class="cart-panel-footer">
+    <div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--clr-text-muted);margin-bottom:.5rem;">
+      <span>🕐</span><span>Estimated delivery: <strong style="color:var(--clr-primary);">30–45 mins</strong> after order</span>
+    </div>
+    <div class="cart-total-row">
+      <span>Order Total</span>
+      <span id="cart-total-amount">₹0.00</span>
+    </div>
+    <div id="cart-actions" style="display:none;">
+      <textarea id="order-notes" placeholder="Special instructions… (e.g. less spicy, extra chutney)"></textarea>
+      <button class="btn btn-primary btn-block btn-lg" id="place-order-btn">Place Order →</button>
+    </div>
+  </div>
+</aside>
+
+<!-- Order Placed Modal -->
+<div class="order-modal-overlay" id="order-modal">
+  <div class="order-modal">
+    <div class="emoji">🎉</div>
+    <h2>Order Placed!</h2>
+    <div class="eta-pill">🕐 Est. delivery by <span id="eta-time">—</span></div>
+    <p>Your order is being reviewed by the kitchen.<br/>We'll start cooking as soon as it's accepted!</p>
+    <button class="btn btn-primary btn-block" onclick="closeModal()">Track My Order →</button>
+  </div>
+</div>
+
+<!-- Main -->
+<main class="page-container">
+  <div class="page-header">
+    <h1>C Kitchen by Oliver 🍽</h1>
+    <p>Fresh & hot — Fried Rice, Noodles, Schezwan Specials, Kabab & Manchurian</p>
+  </div>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" data-category="All">All Items</button>
+    <button class="filter-btn" data-category="Fried Rice & Noodles">🍜 Fried Rice & Noodles</button>
+    <button class="filter-btn" data-category="Schezwan Special">🌶 Schezwan Special</button>
+    <button class="filter-btn" data-category="Kabab & Manchurian">🍗 Kabab & Manchurian</button>
+  </div>
+
+  <div class="menu-grid" id="menu-grid"></div>
+</main>
+
+<script>
+const MENU = [
+  { id:"fr1", name:"Chicken Fried Rice",         desc:"Wok-tossed rice with tender chicken & fresh vegetables",                      price:120, cat:"Fried Rice & Noodles", img:"https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&q=80" },
+  { id:"fr2", name:"Chicken Noodles",            desc:"Stir-fried noodles with juicy chicken strips & special sauce",                price:130, cat:"Fried Rice & Noodles", img:"https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&q=80" },
+  { id:"fr3", name:"Egg Fried Rice",             desc:"Golden fried rice with scrambled egg, vegetables & sesame",                   price:110, cat:"Fried Rice & Noodles", img:"https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&q=80" },
+  { id:"fr4", name:"Egg Noodles",                desc:"Stir-fried noodles with egg, seasonal vegetables & aromatic sauces",         price:120, cat:"Fried Rice & Noodles", img:"https://images.unsplash.com/photo-1559847844-5315695dadae?w=400&q=80" },
+  { id:"fr5", name:"Veg Fried Rice",             desc:"Wok-tossed rice with garden fresh vegetables, soy & herbs",                  price:100, cat:"Fried Rice & Noodles", img:"https://images.unsplash.com/photo-1596560548464-f010549b84d7?w=400&q=80" },
+  { id:"fr6", name:"Veg Noodles",                desc:"Light stir-fried noodles loaded with colourful vegetables",                  price:110, cat:"Fried Rice & Noodles", img:"https://images.unsplash.com/photo-1547592180-85f173990554?w=400&q=80" },
+  { id:"sz1", name:"Schezwan Chicken Fried Rice",desc:"Fiery Schezwan-spiced fried rice with chicken — bold & spicy",              price:150, cat:"Schezwan Special",    img:"https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&q=80" },
+  { id:"sz2", name:"Schezwan Chicken Noodles",   desc:"Spicy Schezwan noodles with chicken strips — extra kick!",                  price:160, cat:"Schezwan Special",    img:"https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&q=80" },
+  { id:"sz3", name:"Schezwan Egg Fried Rice",    desc:"Egg fried rice elevated with our signature Schezwan sauce",                 price:140, cat:"Schezwan Special",    img:"https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&q=80" },
+  { id:"sz4", name:"Schezwan Egg Noodles",       desc:"Noodles in Schezwan sauce with scrambled egg & vegetables",                 price:150, cat:"Schezwan Special",    img:"https://images.unsplash.com/photo-1559847844-5315695dadae?w=400&q=80" },
+  { id:"sz5", name:"Schezwan Veg Fried Rice",    desc:"Vegetarian fried rice smothered in Schezwan sauce",                        price:130, cat:"Schezwan Special",    img:"https://images.unsplash.com/photo-1596560548464-f010549b84d7?w=400&q=80" },
+  { id:"sz6", name:"Schezwan Veg Noodles",       desc:"Vegetarian noodles in spicy Schezwan sauce — satisfying!",                 price:140, cat:"Schezwan Special",    img:"https://images.unsplash.com/photo-1547592180-85f173990554?w=400&q=80" },
+  { id:"km1", name:"Kabab",                      desc:"Juicy char-grilled chicken kebabs marinated in aromatic spices",            price:120, cat:"Kabab & Manchurian",  img:"https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80" },
+  { id:"km2", name:"Fried Chicken",              desc:"Crispy golden-fried chicken with Oliver's special spice blend",            price:200, cat:"Kabab & Manchurian",  img:"https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=400&q=80" },
+  { id:"km3", name:"Chicken Manchurian",         desc:"Crispy chicken balls in tangy, spicy Manchurian sauce",                    price:170, cat:"Kabab & Manchurian",  img:"https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=400&q=80" },
+  { id:"km4", name:"Gobi Manchurian",            desc:"Cauliflower florets in rich, tangy Manchurian sauce — a classic!",        price:160, cat:"Kabab & Manchurian",  img:"https://images.unsplash.com/photo-1630409351241-e90e7f6a8bf4?w=400&q=80" },
+  { id:"km5", name:"Chicken Chilli",             desc:"Tender chicken sautéed with green chillies & capsicum",                    price:180, cat:"Kabab & Manchurian",  img:"https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80" },
+  { id:"km6", name:"Gobi Chilli",                desc:"Crispy cauliflower stir-fried with chillies & tangy sauce",                price:170, cat:"Kabab & Manchurian",  img:"https://images.unsplash.com/photo-1630409351241-e90e7f6a8bf4?w=400&q=80" },
+];
+
+let cart = [];
+
+function getTotal() { return cart.reduce((s, i) => s + i.price * i.qty, 0); }
+function getCount() { return cart.reduce((s, i) => s + i.qty, 0); }
+
+function renderMenu(cat) {
+  const items = cat === "All" ? MENU : MENU.filter(i => i.cat === cat);
+  const grid  = document.getElementById("menu-grid");
+  grid.innerHTML = items.map(item => {
+    const inCart = cart.find(c => c.id === item.id);
+    return `
+      <div class="menu-card">
+        <div class="menu-card-img-wrap">
+          <img src="${item.img}" alt="${item.name}" loading="lazy" onerror="this.src='/assets/placeholder.svg'" />
+          <span class="menu-card-category">${item.cat}</span>
+        </div>
+        <div class="menu-card-body">
+          <h3 class="menu-card-title">${item.name}</h3>
+          <p class="menu-card-desc">${item.desc}</p>
+          <div class="menu-card-footer">
+            <span class="menu-card-price">₹${item.price}</span>
+            <button class="btn btn-primary add-btn" data-id="${item.id}">
+              ${inCart ? `+ More (${inCart.qty})` : '+ Add'}
+            </button>
+          </div>
+        </div>
+      </div>`;
+  }).join("");
+
+  grid.querySelectorAll(".add-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const item = MENU.find(i => i.id === btn.dataset.id);
+      const ex   = cart.find(c => c.id === item.id);
+      if (ex) ex.qty++; else cart.push({ ...item, qty: 1 });
+      updateBadge(); renderMenu(currentCat); showToast(`${item.name} added!`);
+    });
+  });
+}
+
+function renderCart() {
+  const list    = document.getElementById("cart-items-list");
+  const empty   = document.getElementById("cart-empty-msg");
+  const actions = document.getElementById("cart-actions");
+  document.getElementById("cart-total-amount").textContent = `₹${getTotal().toFixed(2)}`;
+  if (cart.length === 0) {
+    list.innerHTML = ""; list.appendChild(empty);
+    empty.style.display = "flex"; actions.style.display = "none"; return;
+  }
+  empty.style.display = "none"; actions.style.display = "block";
+  list.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <img src="${item.img}" alt="${item.name}" onerror="this.src='/assets/placeholder.svg'" />
+      <div class="cart-item-info">
+        <p class="cart-item-name">${item.name}</p>
+        <p class="cart-item-price">₹${item.price}</p>
+      </div>
+      <div class="cart-item-qty">
+        <button class="qty-btn" data-id="${item.id}" data-d="-1">−</button>
+        <span>${item.qty}</span>
+        <button class="qty-btn" data-id="${item.id}" data-d="1">+</button>
+      </div>
+      <button class="cart-remove-btn" data-id="${item.id}">✕</button>
+    </div>`).join("");
+
+  list.querySelectorAll(".qty-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const it = cart.find(c => c.id === btn.dataset.id);
+      if (!it) return;
+      it.qty += parseInt(btn.dataset.d);
+      if (it.qty <= 0) cart = cart.filter(c => c.id !== btn.dataset.id);
+      updateBadge(); renderCart();
+    });
+  });
+  list.querySelectorAll(".cart-remove-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      cart = cart.filter(c => c.id !== btn.dataset.id);
+      updateBadge(); renderCart();
+    });
+  });
+}
+
+function updateBadge() {
+  const b = document.getElementById("cart-badge");
+  const n = getCount();
+  b.textContent = n;
+  b.style.display = n > 0 ? "flex" : "none";
+}
+
+function showToast(msg) {
+  const t = document.createElement("div");
+  t.className = "toast toast-success";
+  t.innerHTML = `<span class="toast-icon">✓</span><span class="toast-message">${msg}</span>`;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => t.classList.add("toast-visible"));
+  setTimeout(() => { t.classList.remove("toast-visible"); setTimeout(() => t.remove(), 400); }, 2500);
+}
+
+// ETA helper — 40 minutes from now
+function getETA() {
+  const d = new Date(Date.now() + 40 * 60 * 1000);
+  return d.toLocaleTimeString("en-IN", { hour:"2-digit", minute:"2-digit" });
+}
+
+// Place order
+document.getElementById("place-order-btn").addEventListener("click", () => {
+  if (cart.length === 0) return;
+  document.getElementById("eta-time").textContent = getETA();
+  document.getElementById("order-modal").classList.add("show");
+  cart = []; updateBadge(); renderCart(); closeCart();
+
+  // Save order to localStorage for orders page preview
+  const orders = JSON.parse(localStorage.getItem("ck_orders") || "[]");
+  orders.unshift({
+    id: "ORD" + Math.random().toString(36).slice(2,9).toUpperCase(),
+    status: "Pending",
+    createdAt: new Date().toISOString(),
+    estimatedDeliveryAt: new Date(Date.now() + 40 * 60 * 1000).toISOString(),
+    items: cart,
+    total: getTotal(),
+    notes: document.getElementById("order-notes").value
+  });
+  localStorage.setItem("ck_orders", JSON.stringify(orders));
+});
+
+function closeModal() {
+  document.getElementById("order-modal").classList.remove("show");
+  window.location.href = "/preview/orders.html";
+}
+document.getElementById("order-modal").addEventListener("click", e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// Filters
+let currentCat = "All";
+document.querySelectorAll(".filter-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentCat = btn.dataset.category;
+    renderMenu(currentCat);
+  });
+});
+
+// Cart panel
+document.getElementById("cart-btn").addEventListener("click", () => {
+  renderCart();
+  document.getElementById("cart-panel").classList.add("open");
+  document.getElementById("cart-overlay").classList.add("visible");
+});
+document.getElementById("cart-overlay").addEventListener("click", closeCart);
+document.getElementById("close-cart-btn").addEventListener("click", closeCart);
+function closeCart() {
+  document.getElementById("cart-panel").classList.remove("open");
+  document.getElementById("cart-overlay").classList.remove("visible");
+}
+
+renderMenu("All");
+</script>
+</body>
+</html>
