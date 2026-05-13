@@ -1,0 +1,121 @@
+/* orders.css — Customer order history & status tracking */
+
+/* ─── Orders Grid ────────────────────────────────────────────── */
+#orders-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ─── Skeleton ───────────────────────────────────────────────── */
+.orders-skeleton { display: flex; flex-direction: column; gap: 1.25rem; }
+.skeleton-card   { height: 180px; border-radius: var(--radius-lg); }
+
+/* ─── Order Card ─────────────────────────────────────────────── */
+.order-card {
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  animation: slideIn 0.3s ease both;
+}
+@keyframes slideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+.order-card:hover { border-color: rgba(249,115,22,.2); }
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  gap: 0.5rem;
+}
+.order-id   { display: block; font-size: 1rem; font-weight: 700; color: var(--clr-text); }
+.order-date { display: block; font-size: 0.78rem; color: var(--clr-text-muted); margin-top: 2px; }
+
+/* ─── Order Items ────────────────────────────────────────────── */
+.order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--clr-border);
+}
+.order-item-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+.order-item-row img {
+  width: 42px; height: 42px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--clr-bg-3);
+  flex-shrink: 0;
+}
+.order-item-row span:first-of-type { flex: 1; color: var(--clr-text); font-weight: 500; }
+.order-item-row span:last-of-type  { color: var(--clr-text-muted); font-size: 0.82rem; }
+
+.order-notes { font-size: 0.82rem; color: var(--clr-text-muted); margin-bottom: 0.75rem; }
+
+.order-card-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+.order-total { font-size: 1.1rem; font-weight: 800; color: var(--clr-primary); }
+
+/* ─── Status Progress Bar ────────────────────────────────────── */
+.status-progress {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 0.75rem 0;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.status-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 64px;
+  position: relative;
+}
+.status-step::before {
+  content: "";
+  position: absolute;
+  top: 13px;
+  left: calc(-50% + 13px);
+  right: calc(50% + 13px);
+  height: 2px;
+  background: var(--clr-surface-2);
+  z-index: 0;
+}
+.status-step:first-child::before { display: none; }
+.status-step.done::before { background: var(--clr-primary); }
+
+.step-dot {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--clr-surface-2);
+  border: 2px solid var(--clr-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem;
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+.status-step.done .step-dot   { background: var(--clr-primary); border-color: var(--clr-primary); color: #fff; }
+.status-step.active .step-dot { background: var(--clr-primary); border-color: var(--clr-primary); color: #fff; box-shadow: 0 0 0 4px rgba(249,115,22,.2); animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 4px rgba(249,115,22,.2); } 50% { box-shadow: 0 0 0 8px rgba(249,115,22,.08); } }
+
+.step-label { font-size: 0.65rem; color: var(--clr-text-muted); margin-top: 4px; text-align: center; }
+.status-step.done .step-label, .status-step.active .step-label { color: var(--clr-primary); font-weight: 600; }
+
+@media (max-width: 600px) {
+  .order-card-header { flex-direction: column; }
+  .status-progress   { gap: 0; }
+}
