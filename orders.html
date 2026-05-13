@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Orders — C Kitchen by Oliver</title>
+  <meta name="description" content="View your order history and track live delivery status on Preston Cloud Kitchen." />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/orders.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="navbar-brand" href="/menu.html">🍽 C Kitchen<span class="brand-dot">.</span></a>
+  <div class="navbar-nav">
+    <a class="nav-link" href="/menu.html">Menu</a>
+    <a class="nav-link active" href="/orders.html">My Orders</a>
+    <a class="nav-link" href="/profile.html">Profile</a>
+    <button class="btn btn-ghost btn-sm" id="logout-btn">Sign Out</button>
+  </div>
+</nav>
+
+<main class="page-container">
+  <div class="page-header">
+    <h1>My Orders 📦</h1>
+    <p>Your order history — updates happen in real-time.</p>
+  </div>
+
+  <!-- Skeleton -->
+  <div class="orders-skeleton" id="orders-skeleton">
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-card" style="height:150px;"></div>
+  </div>
+
+  <!-- Orders Container -->
+  <div id="orders-container"></div>
+
+  <!-- Empty state -->
+  <div class="empty-state" id="orders-empty" style="display:none;">
+    <span class="empty-state-icon">📭</span>
+    <h3>No orders yet</h3>
+    <p>Head to the menu and place your first order!</p>
+    <a href="/menu.html" class="btn btn-primary">Browse Menu →</a>
+  </div>
+</main>
+
+<script type="module" src="/js/orders.js"></script>
+</body>
+</html>
