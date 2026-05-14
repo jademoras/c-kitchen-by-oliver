@@ -77,6 +77,14 @@ function filterItems(category) {
       const { id, name, price, imageUrl } = btn.dataset;
       addToCart({ id, name, price: parseFloat(price), imageUrl });
       showToast(`${name} added to cart!`, "success");
+      
+      const originalText = btn.textContent;
+      btn.textContent = "Added! ✔";
+      btn.classList.add("btn-success");
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.classList.remove("btn-success");
+      }, 1000);
     });
   });
 }
@@ -86,7 +94,7 @@ function menuCardHTML(item) {
   return `
     <div class="menu-card" id="card-${item.id}">
       <div class="menu-card-img-wrap">
-        <img src="${item.imageUrl || '/assets/placeholder.svg'}" alt="${item.name}" loading="lazy" />
+        <img src="${item.imageUrl || '/assets/placeholder.svg'}" alt="${item.name}" loading="lazy" onerror="this.onerror=null;this.src='/assets/placeholder.svg';" />
         <span class="menu-card-category">${item.category}</span>
       </div>
       <div class="menu-card-body">
