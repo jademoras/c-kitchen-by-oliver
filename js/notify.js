@@ -58,36 +58,32 @@ export function trackAdminPresence(adminId) {
  */
 async function isAdminOnline() {
   return new Promise((resolve) => {
-    // Must use the EXACT same channel name to see its presence state
     const channel = supabase.channel(PRESENCE_CHANNEL);
+    let resolved = false;
 
     channel
       .on("presence", { event: "sync" }, () => {
         const state = channel.presenceState();
         const adminCount = Object.keys(state).length;
-        console.log(`[presence] Admins online: ${adminCount}`);
         
-        // Clean up
-        supabase.removeChannel(channel);
-        resolve(adminCount > 0);
-      })
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED") {
-          // Fallback if no sync event arrives within a short period
-          setTimeout(() => {
-            const state = channel.presenceState();
-            const adminCount = Object.keys(state).length;
-            supabase.removeChannel(channel);
-            resolve(adminCount > 0);
-          }, 1000);
+        // If we found an admin, resolve immediately
+        if (adminCount > 0 && !resolved) {
+          console.log(`[presence] Admins online: ${adminCount}`);
+          resolved = true;
+          supabase.removeChannel(channel);
+          resolve(true);
         }
-      });
+      })
+      .subscribe();
 
-    // Global timeout just in case subscription fails or hangs
+    // Give it 2.5 seconds to find an admin. If not, assume offline.
     setTimeout(() => {
-      supabase.removeChannel(channel);
-      resolve(false);
-    }, 3000);
+      if (!resolved) {
+        resolved = true;
+        supabase.removeChannel(channel);
+        resolve(false);
+      }
+    }, 2500);
   });
 }
 
