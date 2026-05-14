@@ -5,13 +5,17 @@
 import { requireAdmin } from "./auth.js";
 import { listenAllOrders, updateOrderStatus } from "./db.js";
 import { showToast, formatCurrency, formatDate, statusBadge, sendNotification } from "./utils.js";
+import { trackAdminPresence } from "./notify.js";
 
 const STATUSES = ["Pending", "Accepted", "Rejected", "Preparing", "Delivered"];
 let prevCount  = null; // track new orders
 
 async function init() {
-  const { profile } = await requireAdmin();
+  const { user, profile } = await requireAdmin();
   document.getElementById("admin-name").textContent = profile.name ?? "Admin";
+
+  // Track admin presence so customers know not to send email
+  trackAdminPresence(user.id);
 
   document.getElementById("logout-btn").addEventListener("click", async () => {
     const { logOut } = await import("./auth.js");
