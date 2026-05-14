@@ -6,6 +6,7 @@ import { requireAuth, getUserProfile } from "./auth.js";
 import { listenMenuItems, placeOrder } from "./db.js";
 import { addToCart, getCart, getCartTotal, getCartCount, updateQuantity, removeFromCart, clearCart } from "./cart.js";
 import { showToast, formatCurrency, setLoading } from "./utils.js";
+import { notifyAdmin } from "./notify.js";
 
 let currentUser   = null;
 let userProfile   = null;
@@ -201,6 +202,18 @@ async function handleCheckout() {
     clearCart();
     closeCartPanel();
     showToast("Order placed successfully! 🎉", "success", 4000);
+
+    // Fire-and-forget email notification to admin
+    notifyAdmin({
+      orderId,
+      userName:    userProfile.name,
+      userPhone:   userProfile.phone,
+      userAddress: userProfile.address,
+      items:       cart,
+      totalAmount: getCartTotal(),
+      notes
+    });
+
     setTimeout(() => window.location.href = "/orders.html", 1500);
   } catch (err) {
     showToast("Failed to place order: " + err.message, "error");
