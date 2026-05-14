@@ -81,7 +81,9 @@ export async function requireAuth() {
     window.location.href = "/index.html";
     return new Promise(() => {}); // never resolves — page is redirecting
   }
-  return session.user;
+  const user = session.user;
+  user.uid = user.id; // Firebase compatibility alias
+  return user;
 }
 
 /**
